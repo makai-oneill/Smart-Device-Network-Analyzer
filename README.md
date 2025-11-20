@@ -8,9 +8,7 @@ A **human-friendly network visualization tool** that turns ARP or Nmap output in
 
 You can try it instantly without downloading anything:
 
-[Smart Network Device Analyzer Live](https://your-username.github.io/smart-network-device-analyzer/)
-
-*(Replace `your-username` with your GitHub username.)*
+[Smart Network Device Analyzer Live](https://makai-oneill.github.io/smart-network-device-analyzer/)
 
 ---
 
