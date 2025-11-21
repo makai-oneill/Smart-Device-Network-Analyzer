@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modern Network Device Analyzer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0f1115;
+    --bg-elev: #171a21;
+    --bg-elev-2: #12151b;
+    --text: #e9edf1;
+    --muted: #b1b8c1;
+    --border: #262b35;
+    --accent: #3dd6c6;
+    --accent-hover: #2ec0b0;
+    --badge: rgba(255,255,255,0.12);
+    --shadow: rgba(0,0,0,0.35);
+
+    --surface-1: #12151b;
+    --surface-2: #171a21;
+    --surface-3: #1c212b;
+
+    --focus: #7cd4ff;
+
+    --bar-1: #3dd6c6;
+    --bar-2: #6ab7ff;
+    --bar-3: #ffd166;
+    --bar-4: #c792ea;
+    --bar-5: #ff8a65;
+    --bar-6: #9e9e9e;
+    --bar-7: #81c784;
+    --bar-8: #90a4ae;
+    --bar-9: #ef9a9a;
+
+    --radius-1: 12px;
+    --radius-2: 14px;
+    --radius-3: 18px;
+  }
+
+  .light {
+    --bg: #f7f8fb;
+    --bg-elev: #ffffff;
+    --bg-elev-2: #f3f5f9;
+    --text: #1b1f26;
+    --muted: #5a6574;
+    --border: #e2e7ef;
+    --accent: #0f8b8d;
+    --accent-hover: #0d7476;
+    --badge: rgba(0,0,0,0.08);
+    --shadow: rgba(0,0,0,0.08);
+
+    --surface-1: #ffffff;
+    --surface-2: #f7f9fc;
+    --surface-3: #eef2f7;
+
+    --focus: #0b79f7;
+
+    --bar-1: #0f8b8d;
+    --bar-2: #1e88e5;
+    --bar-3: #f9a825;
+    --bar-4: #8e24aa;
+    --bar-5: #e64a19;
+    --bar-6: #757575;
+    --bar-7: #2e7d32;
+    --bar-8: #546e7a;
+    --bar-9: #c62828;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    margin: 0; padding: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 28px 18px 60px;
+  }
+
+  .app-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: end;
+    margin-bottom: 16px;
+  }
+
+  .title-block h1 {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-size: clamp(22px, 3.2vw, 28px);
+  }
+  .title-block p {
+    margin: 6px 0 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2);
+    padding: 10px 12px;
+    box-shadow: 0 2px 10px var(--shadow);
+    height: fit-content;
+  }
+  .mode-toggle label { font-size: 13px; color: var(--muted); }
+  select, input[type="text"] {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background-color: var(--surface-1);
+    color: var(--text);
+    outline: none;
+  }
+  select:focus, input[type="text"]:focus, textarea:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 25%, transparent);
+  }
+
+  .collapsible {
+    border-radius: var(--radius-3);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 14px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    box-shadow: 0 6px 18px var(--shadow);
+  }
+
+  .collapsible-header {
+    padding: 14px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .collapsible-header:hover {
+    background: var(--surface-3);
+  }
+  .collapsible-header .left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .collapsible-header .eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: var(--badge);
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+
+  .collapsible-body {
+    padding: 14px 18px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .instructions p, .instructions li { margin: 6px 0; }
+
+  .input-wrap {
+    border-radius: var(--radius-3);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px var(--shadow);
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 220px;
+    border-radius: 12px;
+    padding: 12px;
+    background-color: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+
+  .inline-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  button {
+    padding: 10px 16px;
+    margin: 8px 0;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--accent), var(--accent-hover));
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.06s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 6px 14px color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+  button:hover { filter: brightness(1.05); }
+  button:active { transform: translateY(1px) scale(0.998); }
+  button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 35%, transparent);
+  }
+
+  .controls-shell {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent), color-mix(in srgb, var(--bg) 92%, transparent));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-3);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 24px var(--shadow);
+    padding: 12px;
+    margin: 14px 0;
+  }
+
+  .controls-row {
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto auto auto auto auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .controls-row label { font-size: 13px; color: var(--muted); }
+
+  .summary {
+    border-radius: var(--radius-3);
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+    box-shadow: 0 6px 18px var(--shadow);
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .summary-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .summary-card .label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .summary-card .value {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 6px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .chart {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    margin: 8px 16px 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 2px 8px var(--shadow);
+  }
+  .chart-title {
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .chart-bars {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .bar {
+    display: grid;
+    grid-template-columns: 240px 1fr 60px;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .bar .label { color: var(--muted); }
+  .bar .track {
+    height: 12px;
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar .fill {
+    height: 100%;
+    width: 0%;
+    transition: width 520ms cubic-bezier(.2,.8,.2,1);
+    border-radius: 999px;
+  }
+  .bar .count { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .subnet-section {
+    margin-top: 18px;
+    border-radius: var(--radius-3);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 6px 18px var(--shadow);
+    background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  }
+
+  .subnet-header {
+    padding: 14px 18px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s;
+    letter-spacing: -0.01em;
+  }
+  .subnet-header:hover {
+    background: var(--surface-3);
+  }
+
+  .toggle-arrow {
+    font-size: 16px;
+    margin-left: 10px;
+    opacity: 0.8;
+  }
+
+  .device-card {
+    display: grid;
+    grid-template-columns: 170px 220px 220px 1fr 140px 28px;
+    column-gap: 12px;
+    padding: 14px 18px;
+    margin: 8px 10px;
+    border-radius: 12px;
+    align-items: center;
+    font-size: 14px;
+    transition: opacity 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+    position: relative;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  .device-card:hover {
+    box-shadow: 0 6px 14px var(--shadow);
+    transform: translateY(-1px);
+  }
+
+  /* Existing left accents (keep or remove) */
+  .device-type-iphone { border-left: 6px solid #43a047; }
+  .device-type-android { border-left: 6px solid #29b6f6; }
+  .device-type-windows { border-left: 6px solid #fdd835; }
+  .device-type-tv { border-left: 6px solid #ab47bc; }
+  .device-type-printer { border-left: 6px solid #ff7043; }
+  .device-type-nintendo { border-left: 6px solid #e53935; }
+  .device-type-playstation { border-left: 6px solid #3949ab; }
+  .device-type-xbox { border-left: 6px solid #2e7d32; }
+  .device-type-unknown { border-left: 6px solid #616161; }
+
+  /* NEW: full-card background tints for each type */
+  .device-type-iphone {
+    background-color: rgba(67, 160, 71, 0.12);
+    border-color: rgba(67, 160, 71, 0.35);
+  }
+  .device-type-android {
+    background-color: rgba(41, 182, 246, 0.12);
+    border-color: rgba(41, 182, 246, 0.35);
+  }
+  .device-type-windows {
+    background-color: rgba(253, 216, 53, 0.12);
+    border-color: rgba(253, 216, 53, 0.35);
+  }
+  .device-type-tv {
+    background-color: rgba(171, 71, 188, 0.12);
+    border-color: rgba(171, 71, 188, 0.35);
+  }
+  .device-type-printer {
+    background-color: rgba(255, 112, 67, 0.12);
+    border-color: rgba(255, 112, 67, 0.35);
+  }
+  .device-type-nintendo {
+    background-color: rgba(229, 57, 53, 0.12);
+    border-color: rgba(229, 57, 53, 0.35);
+  }
+  .device-type-playstation {
+    background-color: rgba(57, 73, 171, 0.12);
+    border-color: rgba(57, 73, 171, 0.35);
+  }
+  .device-type-xbox {
+    background-color: rgba(46, 125, 50, 0.12);
+    border-color: rgba(46, 125, 50, 0.35);
+  }
+  .device-type-unknown {
+    background-color: rgba(97, 97, 97, 0.12);
+    border-color: rgba(97, 97, 97, 0.35);
+  }
+
+  /* Optional: slightly stronger tint on hover for better affordance */
+  .device-card.device-type-iphone:hover { background-color: rgba(67, 160, 71, 0.16); }
+  .device-card.device-type-android:hover { background-color: rgba(41, 182, 246, 0.16); }
+  .device-card.device-type-windows:hover { background-color: rgba(253, 216, 53, 0.16); }
+  .device-card.device-type-tv:hover { background-color: rgba(171, 71, 188, 0.16); }
+  .device-card.device-type-printer:hover { background-color: rgba(255, 112, 67, 0.16); }
+  .device-card.device-type-nintendo:hover { background-color: rgba(229, 57, 53, 0.16); }
+  .device-card.device-type-playstation:hover { background-color: rgba(57, 73, 171, 0.16); }
+  .device-card.device-type-xbox:hover { background-color: rgba(46, 125, 50, 0.16); }
+  .device-card.device-type-unknown:hover { background-color: rgba(97, 97, 97, 0.16); }
+
+  .device-card span { text-align: left; }
+
+  .badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--badge);
+    font-size: 11px;
+  }
+
+  .info-tooltip {
+    font-size: 12px;
+    opacity: 0.85;
+    text-align: right;
+  }
+
+  .fade-slide-enter { opacity: 0; transform: translateY(-6px); }
+  .fade-slide-enter-active {
+    opacity: 1; transform: translateY(0);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  code.sample {
+    display: block;
+    white-space: pre-wrap;
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: 8px;
+    color: var(--text);
+    margin-top: 8px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1040px) {
+    .controls-row {
+      grid-template-columns: auto auto auto 1fr auto auto;
+      grid-auto-rows: minmax(36px, auto);
+    }
+  }
+  @media (max-width: 900px) {
+    .summary-grid { grid-template-columns: repeat(3, minmax(140px, 1fr)); }
+    .bar { grid-template-columns: 1fr; }
+    .bar .label { order: 1; }
+    .bar .track { order: 2; }
+    .bar .count { order: 3; text-align: left; }
+    .device-card {
+      grid-template-columns: 1fr;
+      row-gap: 6px;
+    }
+  }
+  @media (max-width: 600px) {
+    .summary-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+    .app-header { grid-template-columns: 1fr; }
+    .controls-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="app-header">
+    <div class="title-block">
+      <h1>Modern Network Device Analyzer</h1>
+      <p>Paste ARP or Nmap discovery output, then analyze, filter and export your LAN devices.</p>
+    </div>
+    <div class="mode-toggle">
+      <label for="modeToggle">Theme</label>
+      <select id="modeToggle" onchange="toggleTheme()" aria-label="Theme selection">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+        <option value="system">System</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="collapsible" aria-expanded="false">
+    <div class="collapsible-header" role="button" tabindex="0" aria-controls="instructionsBody">
+      <div class="left">
+        <span class="eyebrow">Guide</span>
+        <div>Instructions & Quick Start</div>
+      </div>
+      <div class="toggle-arrow" aria-hidden="true">▼</div>
+    </div>
+    <div class="collapsible-body instructions" id="instructionsBody">
+      <p><strong>Quick Start</strong></p>
+      <ol>
+        <li>Install a scanner if needed (e.g., Nmap).</li>
+        <li>Run a discovery scan on your LAN:
+          <ul>
+            <li>macOS: <code>brew install nmap</code></li>
+            <li>Linux (Debian/Ubuntu): <code>sudo apt-get install nmap</code></li>
+            <li>Linux (Fedora): <code>sudo dnf install nmap</code></li>
+          </ul>
+          Example scan (requires local privileges for MAC addresses):<br>
+          <code>sudo nmap -sn 192.168.1.0/24</code>
+        </li>
+        <li>Copy the IP/MAC lines (or use <code>arp -a</code>) and paste them into the box below.</li>
+        <li>Click “Analyze Network”. Filter, search, and export as needed.</li>
+      </ol>
+
+      <p><strong>Supported Inputs</strong></p>
+      <ul>
+        <li>ARP: <code>? (IP) at MAC on IFACE ...</code></li>
+        <li>Nmap host discovery: <code>Nmap scan report for ...</code> and <code>MAC Address: ...</code></li>
+      </ul>
+
+      <p><strong>Safety</strong></p>
+      <p style="color:#ffb74d;"><strong>Only scan networks you own or have explicit permission to test.</strong> Scanning unknown networks may be illegal or against policy.</p>
+
+      <p><strong>How to get your subnet</strong></p>
+      <ul>
+        <li>macOS/Linux: <code>ip route</code> or <code>ifconfig</code> to find your interface and network (e.g., 192.168.1.0/24).</li>
+        <li>Routers typically use 192.168.0.0/24, 192.168.1.0/24, or 10.0.0.0/24.</li>
+      </ul>
+
+      <p>Notes:</p>
+      <ul>
+        <li>Randomized (locally administered) MACs are common on Wi‑Fi; detection is heuristic.</li>
+        <li>Vendors are matched by OUI; extend macDatabase for better coverage.</li>
+        <li>Supports ARP “? (IP) at MAC on IFACE” and Nmap “Nmap scan report for … / MAC Address: …”.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="collapsible">
+    <div class="collapsible-header" role="button" tabindex="0" aria-controls="tipsBody">
+      <div class="left">
+        <span class="eyebrow">Examples</span>
+        <div>Tips & Examples</div>
+      </div>
+      <div class="toggle-arrow" aria-hidden="true">▼</div>
+    </div>
+    <div class="collapsible-body" id="tipsBody">
+      <p>Example ARP output (copy or insert):</p>
+      <code class="sample" id="sampleArp">? (192.168.1.1) at aa:93:95:12:34:56 on en0 ifscope [ethernet]
+? (192.168.1.10) at 10:b5:88:ab:cd:ef on en0 ifscope [ethernet]
+? (192.168.1.15) at e6:cf:ac:11:22:33 on en0 ifscope [ethernet]
+? (192.168.1.22) at 32:b1:77:44:55:66 on en0 ifscope [ethernet]
+? (192.168.1.255) at ff:ff:ff:ff:ff:ff on en0 ifscope [ethernet]</code>
+
+      <div class="inline-buttons">
+        <button type="button" onclick="insertSample('arp')">Insert ARP Sample</button>
+      </div>
+
+      <p style="margin-top:14px;">Example Nmap host discovery (paste lines that show IP and MAC):</p>
+      <code class="sample" id="sampleNmap">sudo nmap -sn 192.168.1.0/24
+Nmap scan report for 192.168.1.50
+Host is up (0.0020s latency).
+MAC Address: 74:A6:CD:00:11:22 (Apple, Inc.)
+Nmap scan report for myhost (192.168.1.60)
+Host is up (0.0030s latency).
+MAC Address: 8E-4C-C8-AA-BB-CC (Netgear)</code>
+
+      <div class="inline-buttons">
+        <button type="button" onclick="insertSample('nmap')">Insert Nmap Sample</button>
+      </div>
+
+      <p style="margin-top:14px;">Tip: On macOS, you can dump ARP with: <code>arp -a</code>. On many Linux systems: <code>ip neigh</code> or <code>arp -n</code>.</p>
+    </div>
+  </div>
+
+  <div class="input-wrap" aria-label="Input section">
+    <textarea id="inputList" placeholder="Paste your ARP/Nmap list here..." aria-label="Paste ARP or Nmap output"></textarea>
+    <div class="inline-buttons">
+      <button onclick="parseList()">Analyze Network</button>
+      <button onclick="clearAll()" title="Clear input and reset filters">Clear</button>
+    </div>
+  </div>
+
+  <div class="collapsible fade-slide-enter summary" id="summarySection" style="display:none;">
+    <div class="collapsible-header" id="summaryHeader" role="button" tabindex="0" aria-controls="summaryBody">
+      <div class="left">
+        <span class="eyebrow">Overview</span>
+        <div>Summary</div>
+      </div>
+      <div class="toggle-arrow">▲</div>
+    </div>
+    <div class="collapsible-body" id="summaryBody" style="display:block;">
+      <div id="summary" class="summary-grid" aria-live="polite"></div>
+
+      <div id="chart" class="chart" style="display:none;">
+        <div class="chart-title">Device distribution</div>
+        <div class="chart-bars" id="chartBars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-shell" role="region" aria-label="Controls">
+    <div class="controls-row">
+      <label for="filterSelect">Type</label>
+      <select id="filterSelect" onchange="applyFilterAndRender()">
+        <option value="all">All</option>
+        <option value="iphone">iPhone / iPad</option>
+        <option value="android">Android device</option>
+        <option value="windows">Windows / Chromebook</option>
+        <option value="tv">Router / TV / Access Point</option>
+        <option value="printer">Printer</option>
+        <option value="nintendo">Nintendo</option>
+        <option value="playstation">PlayStation</option>
+        <option value="xbox">Xbox</option>
+        <option value="unknown">Unknown / IoT</option>
+      </select>
+
+      <label for="sortSelect">Sort</label>
+      <select id="sortSelect" onchange="applyFilterAndRender()">
+        <option value="ip">IP</option>
+        <option value="vendor">Vendor</option>
+        <option value="type">Type</option>
+        <option value="iface">Interface</option>
+      </select>
+
+      <input type="text" id="searchBox" placeholder="Search IP/MAC/Vendor/Type/IFACE" oninput="applyFilterAndRender()" aria-label="Search" />
+      <label for="groupBySubnetToggle" style="justify-self:end;">Group by subnet</label>
+      <input type="checkbox" id="groupBySubnetToggle" onchange="applyFilterAndRender()" aria-label="Group by subnet">
+      <button onclick="copyResults()" aria-label="Copy filtered results">Copy</button>
+      <button onclick="exportCSV()" aria-label="Export CSV">CSV</button>
+      <button onclick="exportJSON()" aria-label="Export JSON">JSON</button>
+      <button onclick="exportPerSubnet()" aria-label="Export per subnet">Per Subnet</button>
+    </div>
+  </div>
+
+  <div id="results" aria-live="polite"></div>
+</div>
+
+<script>
+/*
+  macDatabase: OUI -> Vendor. Add starter sets for Nintendo, Sony, Microsoft.
+  Note: OUIs can be numerous; this is a curated subset commonly seen in consumer devices.
+  Format: lowercase, colon-separated, first 3 bytes.
+*/
+const macDatabase = {
+  // Existing sample OUIs
+  "10:b5:88": "Apple, Inc.",
+  "74:a6:cd": "Apple, Inc.",
+  "32:b1:77": "Cisco Systems",
+  "e6:cf:ac": "Samsung Electronics",
+  "aa:93:95": "TP-Link",
+  "1e:27:17": "Google",
+  "8e:4c:c8": "Netgear",
+
+  // Nintendo (Switch / consoles) - curated sample
+  "00:09:bf": "Nintendo Co., Ltd.",
+  "00:1f:32": "Nintendo Co., Ltd.",
+  "00:24:44": "Nintendo Co., Ltd.",
+  "00:26:59": "Nintendo Co., Ltd.",
+  "00:50:f2": "Nintendo Co., Ltd.",
+  "10:bf:48": "Nintendo Co., Ltd.",
+  "18:2a:7b": "Nintendo Co., Ltd.",
+  "40:f4:07": "Nintendo Co., Ltd.",
+  "68:96:7b": "Nintendo Co., Ltd.",
+  "7c:bb:8a": "Nintendo Co., Ltd.",
+  "8c:1a:b1": "Nintendo Co., Ltd.",
+  "90:2a:9a": "Nintendo Co., Ltd.",
+  "a0:06:1b": "Nintendo Co., Ltd.",
+  "a8:0f:10": "Nintendo Co., Ltd.",
+  "b8:ae:ed": "Nintendo Co., Ltd.",
+  "c0:25:e9": "Nintendo Co., Ltd.",
+  "cc:fb:65": "Nintendo Co., Ltd.",
+  "d8:6b:f7": "Nintendo Co., Ltd.",
+  "e0:6f:b5": "Nintendo Co., Ltd.",
+  "ec:26:ca": "Nintendo Co., Ltd.",
+
+  // Sony (PlayStation) - curated sample
+  "00:01:4a": "Sony Corporation",
+  "00:13:15": "Sony Interactive Entertainment",
+  "00:19:c5": "Sony Corporation",
+  "00:1d:0d": "Sony Corporation",
+  "00:24:8d": "Sony Corporation",
+  "00:26:5b": "Sony Interactive Entertainment",
+  "08:57:00": "Sony Interactive Entertainment",
+  "10:bf:48": "Nintendo Co., Ltd.", // keep Nintendo mapping if overlapping
+  "34:fc:ef": "Sony Interactive Entertainment",
+  "40:2b:2c": "Sony Interactive Entertainment",
+  "54:53:ed": "Sony Interactive Entertainment",
+  "70:9e:29": "Sony Interactive Entertainment",
+  "78:24:af": "Sony Interactive Entertainment",
+  "a8:e3:ee": "Sony Interactive Entertainment",
+  "b8:f9:4a": "Sony Interactive Entertainment",
+  "c8:63:f1": "Sony Interactive Entertainment",
+  "d0:03:df": "Sony Interactive Entertainment",
+  "f8:46:1c": "Sony Interactive Entertainment",
+
+  // Microsoft (Xbox) - curated sample
+  "00:03:ff": "Microsoft Corporation",
+  "00:22:48": "Microsoft Corporation",
+  "00:50:f2": "Microsoft Corporation", // shared with Wi-Fi Alliance in some contexts; heuristic
+  "2c:54:2d": "Microsoft Corporation",
+  "28:18:78": "Microsoft Corporation",
+  "28:16:ad": "Microsoft Corporation",
+  "30:59:b7": "Microsoft Corporation",
+  "40:16:7e": "Microsoft Corporation",
+  "44:16:22": "Microsoft Corporation",
+  "7c:ed:8d": "Microsoft Corporation",
+  "9c:b6:d0": "Microsoft Corporation",
+  "b4:ae:2b": "Microsoft Corporation",
+  "bc:83:a7": "Microsoft Corporation",
+  "c8:3f:26": "Microsoft Corporation",
+  "dc:3c:2e": "Microsoft Corporation",
+  "e8:40:f2": "Microsoft Corporation",
+  "f0:1d:bc": "Microsoft Corporation",
+};
+
+// Dedicated console OUI map for direct identification (prefix -> console type)
+const consoleOuis = {
+  // Nintendo
+  "00:09:bf": "Nintendo",
+  "00:1f:32": "Nintendo",
+  "00:24:44": "Nintendo",
+  "00:26:59": "Nintendo",
+  "00:50:f2": "Nintendo", // note: may overlap; still hint Nintendo
+  "10:bf:48": "Nintendo",
+  "18:2a:7b": "Nintendo",
+  "40:f4:07": "Nintendo",
+  "68:96:7b": "Nintendo",
+  "7c:bb:8a": "Nintendo",
+  "8c:1a:b1": "Nintendo",
+  "90:2a:9a": "Nintendo",
+  "a0:06:1b": "Nintendo",
+  "a8:0f:10": "Nintendo",
+  "b8:ae:ed": "Nintendo",
+  "c0:25:e9": "Nintendo",
+  "cc:fb:65": "Nintendo",
+  "d8:6b:f7": "Nintendo",
+  "e0:6f:b5": "Nintendo",
+  "ec:26:ca": "Nintendo",
+
+  // PlayStation (Sony)
+  "00:01:4a": "PlayStation",
+  "00:13:15": "PlayStation",
+  "00:19:c5": "PlayStation",
+  "00:1d:0d": "PlayStation",
+  "00:24:8d": "PlayStation",
+  "00:26:5b": "PlayStation",
+  "08:57:00": "PlayStation",
+  "34:fc:ef": "PlayStation",
+  "40:2b:2c": "PlayStation",
+  "54:53:ed": "PlayStation",
+  "70:9e:29": "PlayStation",
+  "78:24:af": "PlayStation",
+  "a8:e3:ee": "PlayStation",
+  "b8:f9:4a": "PlayStation",
+  "c8:63:f1": "PlayStation",
+  "d0:03:df": "PlayStation",
+  "f8:46:1c": "PlayStation",
+
+  // Xbox (Microsoft)
+  "00:03:ff": "Xbox",
+  "00:22:48": "Xbox",
+  "00:50:f2": "Xbox", // may be broad; still used as a hint
+  "2c:54:2d": "Xbox",
+  "28:18:78": "Xbox",
+  "28:16:ad": "Xbox",
+  "30:59:b7": "Xbox",
+  "40:16:7e": "Xbox",
+  "44:16:22": "Xbox",
+  "7c:ed:8d": "Xbox",
+  "9c:b6:d0": "Xbox",
+  "b4:ae:2b": "Xbox",
+  "bc:83:a7": "Xbox",
+  "c8:3f:26": "Xbox",
+  "dc:3c:2e": "Xbox",
+  "e8:40:f2": "Xbox",
+  "f0:1d:bc": "Xbox",
+};
+
+const hostnameConsoleHints = {
+  nintendo: ["switch", "nintendo", "nx"],
+  playstation: ["ps5", "ps4", "playstation", "ps-"],
+  xbox: ["xbox", "microsoft", "msft"]
+};
+
+function normalizeMac(macRaw) {
+  if (!macRaw) return "";
+  const hex = macRaw.trim().replace(/-/g, ":").toLowerCase();
+  return hex.split(":").map(g => g.padStart(2, "0")).join(":");
+}
+
+function isRandomizedMac(mac) {
+  const parts = mac.split(":");
+  if (parts.length < 1) return false;
+  const firstByte = parseInt(parts[0], 16);
+  if (isNaN(firstByte)) return false;
+  return (firstByte & 0b00000010) !== 0;
+}
+
+function consoleTypeFromOUI(mac) {
+  const prefix = mac.split(":").slice(0,3).join(":");
+  return consoleOuis[prefix] || null;
+}
+
+function consoleTypeFromVendor(vendor) {
+  if (!vendor) return null;
+  const v = vendor.toLowerCase();
+  if (v.includes("nintendo")) return "Nintendo";
+  if (v.includes("sony")) return "PlayStation";
+  if (v.includes("microsoft")) return "Xbox";
+  return null;
+}
+
+function consoleTypeFromHostname(hostname) {
+  if (!hostname) return null;
+  const h = hostname.toLowerCase();
+  if (hostnameConsoleHints.nintendo.some(k => h.includes(k))) return "Likely Nintendo";
+  if (hostnameConsoleHints.playstation.some(k => h.includes(k))) return "Likely PlayStation";
+  if (hostnameConsoleHints.xbox.some(k => h.includes(k))) return "Likely Xbox";
+  return null;
+}
+
+function guessDevice(ip, mac, vendor, hostname) {
+  // 1) Direct console identification via OUI
+  const ouiConsole = consoleTypeFromOUI(mac);
+  if (ouiConsole) return ouiConsole;
+
+  // 2) Vendor-based identification (explicit)
+  const vendorConsole = consoleTypeFromVendor(vendor);
+  if (vendorConsole) return vendorConsole;
+
+  // 3) Special IP-based categories
+  if (ip.startsWith("239.")) return "Multicast address";
+  if (ip.endsWith(".255")) return "Broadcast address";
+
+  // 4) Hostname hints (likely labels)
+  const hostHint = consoleTypeFromHostname(hostname);
+  if (hostHint) return hostHint;
+
+  // 5) Existing heuristics
+  if (vendor && vendor !== "Unknown") {
+    const v = vendor.toLowerCase();
+    if (v.includes("apple")) return "iPhone / iPad";
+    if (v.includes("samsung") || v.includes("google")) return "Android device";
+    if (v.includes("microsoft") || v.includes("cisco")) return "Windows / Chromebook";
+    if (v.includes("netgear") || v.includes("tp-link") || v.includes("tplink")) return "Router / TV / Access Point";
+    if (v.includes("hp") || v.includes("hewlett") || v.includes("brother")) return "Printer";
+  }
+  if (isRandomizedMac(mac)) return "Likely Wi-Fi device (phone/tablet/laptop)";
+  return "Unknown / IoT / TV / Printer";
+}
+
+function deviceClass(type) {
+  const t = type.toLowerCase();
+  if (t.includes("nintendo")) return "device-type-nintendo";
+  if (t.includes("playstation")) return "device-type-playstation";
+  if (t.includes("xbox")) return "device-type-xbox";
+  switch(t){
+    case "iphone / ipad": return "device-type-iphone";
+    case "android device": return "device-type-android";
+    case "windows / chromebook": return "device-type-windows";
+    case "router / tv / access point": return "device-type-tv";
+    case "printer": return "device-type-printer";
+    default: return "device-type-unknown";
+  }
+}
+
+let globalRows = [];
+let groupedBySubnet = {};
+let groupBySubnet = true;
+
+function parseList() {
+  const input = document.getElementById("inputList").value;
+  saveState();
+  const lines = input.split(/\r?\n/);
+
+  const rows = [];
+  let currentNmapIP = null;
+  let currentNmapHostname = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    if (/\b([a-f0-9:]{2,}:){2,}/i.test(line) && !line.includes("MAC Address:")) {
+      // likely IPv6 address; skip
+    }
+
+    // ARP
+    let arpMatch = line.match(/\?\s+\((\d{1,3}(?:\.\d{1,3}){3})\)\s+at\s+([0-9a-fA-F:\-]{11,})\s+on\s+(\S+)/);
+    if (arpMatch) {
+      const ip = arpMatch[1];
+      const mac = normalizeMac(arpMatch[2]);
+      const iface = arpMatch[3];
+      const prefix = mac.split(":").slice(0,3).join(":");
+      const vendor = macDatabase[prefix] || "Unknown";
+      const type = guessDevice(ip, mac, vendor, null);
+      rows.push({ ip, mac, vendor, type, iface, subnet: subnetKey(ip), randomized: isRandomizedMac(mac), source: "ARP", hostname: null });
+      continue;
+    }
+
+    // Nmap report line: capture hostname if present
+    let nmapReport = line.match(/^Nmap scan report for\s+(.+)$/i);
+    if (nmapReport) {
+      const rest = nmapReport[1].trim();
+      let ip = null;
+      let hostname = null;
+      const inParens = rest.match(/\((\d{1,3}(?:\.\d{1,3}){3})\)/);
+      if (inParens) {
+        ip = inParens[1];
+        hostname = rest.replace(/\s*\(\d{1,3}(?:\.\d{1,3}){3}\)\s*$/, "").trim();
+      } else {
+        const ipOnly = rest.match(/^(\d{1,3}(?:\.\d{1,3}){3})$/);
+        ip = ipOnly ? ipOnly[1] : null;
+        hostname = ipOnly ? null : rest;
+      }
+      currentNmapIP = ip;
+      currentNmapHostname = hostname && hostname.length ? hostname : null;
+      continue;
+    }
+
+    // Nmap MAC line
+    let macLine = line.match(/^MAC Address:\s*([0-9A-Fa-f:\-]{11,})(?:\s*\(([^)]+)\))?/i);
+    if (macLine && currentNmapIP) {
+      const mac = normalizeMac(macLine[1]);
+      const vendorFromLine = macLine[2] ? macLine[2].trim() : "";
+      const prefix = mac.split(":").slice(0,3).join(":");
+      const vendor = vendorFromLine || macDatabase[prefix] || "Unknown";
+      const type = guessDevice(currentNmapIP, mac, vendor, currentNmapHostname);
+      rows.push({
+        ip: currentNmapIP,
+        mac,
+        vendor,
+        type,
+        iface: "nmap",
+        subnet: subnetKey(currentNmapIP),
+        randomized: isRandomizedMac(mac),
+        source: "Nmap",
+        hostname: currentNmapHostname
+      });
+      continue;
+    }
+
+    if (/^Nmap done:|^Host is up|^Not shown:|^PORT|^Service Info:/i.test(line)) {
+      continue;
+    }
+  }
+
+  const seen = new Set();
+  globalRows = rows.filter(r => {
+    const key = `${r.ip}|${r.mac}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  groupAndRender();
+  applyFilterAndRender();
+}
+
+function subnetKey(ip) {
+  const parts = ip.split(".");
+  if (parts.length >= 3) {
+    return `${parts[0]}.${parts[1]}.${parts[2]}`;
+  }
+  return ip.split(".")[0] || "unknown";
+}
+
+function groupAndRender() {
+  const sortBy = document.getElementById("sortSelect").value || "ip";
+  const sorted = [...globalRows].sort((a,b) => compareRows(a,b,sortBy));
+
+  groupedBySubnet = {};
+  for (const row of sorted) {
+    const key = row.subnet;
+    if (!groupedBySubnet[key]) groupedBySubnet[key] = [];
+    groupedBySubnet[key].push(row);
+  }
+  renderSummary(sorted);
+  renderChart(sorted);
+  renderResults(groupedBySubnet);
+}
+
+function compareRows(a, b, sortBy) {
+  switch (sortBy) {
+    case "vendor":
+      return a.vendor.localeCompare(b.vendor);
+    case "type":
+      return a.type.localeCompare(b.type);
+    case "iface":
+      return a.iface.localeCompare(b.iface);
+    case "ip":
+    default:
+      return ipToNum(a.ip) - ipToNum(b.ip);
+  }
+}
+
+function ipToNum(ip) {
+  const parts = ip.split(".").map(n => parseInt(n, 10));
+  if (parts.length !== 4 || parts.some(n => isNaN(n))) return 0;
+  return ((parts[0] << 24) >>> 0) + (parts[1] << 16) + (parts[2] << 8) + parts[3];
+}
+
+function renderSummary(rows) {
+  const summarySection = document.getElementById("summarySection");
+  const summaryDiv = document.getElementById("summary");
+  const total = rows.length;
+  const byType = {};
+  let randomized = 0;
+  for (const r of rows) {
+    const cls = deviceClass(r.type);
+    byType[cls] = (byType[cls] || 0) + 1;
+    if (r.randomized) randomized++;
+  }
+
+  const get = (cls) => byType[cls] || 0;
+
+  // Build summary items and hide those with zero value (except total, which is handled by section visibility)
+  const items = [
+    { label: "Total devices", value: total, always: true },
+    { label: "Apple (iPhone/iPad)", value: get("device-type-iphone") },
+    { label: "Android", value: get("device-type-android") },
+    { label: "Windows/Chromebook", value: get("device-type-windows") },
+    { label: "Routers/TV/AP", value: get("device-type-tv") },
+    { label: "Printers", value: get("device-type-printer") },
+    { label: "Nintendo", value: get("device-type-nintendo") },
+    { label: "PlayStation", value: get("device-type-playstation") },
+    { label: "Xbox", value: get("device-type-xbox") },
+    { label: "Unknown / IoT", value: get("device-type-unknown") }
+  ];
+
+  const visibleItems = items.filter(it => it.always || it.value > 0);
+
+  summaryDiv.innerHTML = visibleItems.map(it => `
+    <div class="summary-card">
+      <div class="label">${it.label}</div>
+      <div class="value">${it.value}</div>
+    </div>
+  `).join("");
+
+  const wasHidden = summarySection.style.display === "none" || summarySection.style.display === "";
+  summarySection.style.display = total > 0 ? "block" : "none";
+
+  if (total > 0 && wasHidden) {
+    requestAnimationFrame(() => {
+      summarySection.classList.add("fade-slide-enter-active");
+      setTimeout(() => {
+        summarySection.classList.remove("fade-slide-enter", "fade-slide-enter-active");
+      }, 240);
+    });
+  }
+
+  const chart = document.getElementById("chart");
+  chart.style.display = total > 0 ? "block" : "none";
+}
+
+function renderChart(rows) {
+  const chartBars = document.getElementById("chartBars");
+  chartBars.innerHTML = "";
+
+  // Count by normalized labels
+  const counts = {};
+  for (const r of rows) {
+    const label = normalizeTypeLabel(r.type);
+    counts[label] = (counts[label] || 0) + 1;
+  }
+
+  // Ordered labels for consistency
+  const labels = [
+    "iPhone / iPad",
+    "Android device",
+    "Windows / Chromebook",
+    "Router / TV / Access Point",
+    "Printer",
+    "Nintendo",
+    "PlayStation",
+    "Xbox",
+    "Unknown / IoT / TV / Printer",
+    "Likely Wi-Fi device (phone/tablet/laptop)",
+    "Multicast address",
+    "Broadcast address",
+    "Likely Nintendo",
+    "Likely PlayStation",
+    "Likely Xbox"
+  ];
+
+  // Only keep those with count > 0
+  const nonZero = labels.filter(label => (counts[label] || 0) > 0);
+
+  // If no non-zero categories, show a small hint and exit
+  if (nonZero.length === 0) {
+    chartBars.innerHTML = `<div style="color: var(--muted); font-size: 13px;">No data</div>`;
+    return;
+  }
+
+  const max = Math.max(1, ...nonZero.map(label => counts[label]));
+
+  nonZero.forEach((label, idx) => {
+    const count = counts[label] || 0;
+    const pct = Math.round((count / max) * 100);
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    const colorVar = `var(--bar-${(idx % 9) + 1})`;
+    bar.innerHTML = `
+      <div class="label">${label}</div>
+      <div class="track"><div class="fill" style="width:0%; background:${colorVar};"></div></div>
+      <div class="count">${count}</div>
+    `;
+    chartBars.appendChild(bar);
+
+    requestAnimationFrame(() => {
+      const fill = bar.querySelector('.fill');
+      fill.style.width = pct + '%';
+    });
+  });
+}
+
+function normalizeTypeLabel(t) {
+  return t;
+}
+
+function renderResults(subnets) {
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+
+  const groupToggle = document.getElementById("groupBySubnetToggle");
+  const shouldGroup = groupToggle ? groupToggle.checked : true;
+
+  if (!shouldGroup) {
+    // Flat list rendering
+    const section = document.createElement("div");
+    section.className = "subnet-section";
+
+    const header = document.createElement("div");
+    header.className = "subnet-header";
+    const allDevices = Object.values(subnets).flat();
+    header.innerHTML = `
+      <div>All devices — <span class="device-count">${allDevices.length}</span></div>
+      <div class="toggle-arrow">▲</div>
+    `;
+    section.appendChild(header);
+
+    const tableDiv = document.createElement("div");
+    tableDiv.style.display = "block";
+
+    allDevices.forEach(d => {
+      const card = document.createElement("div");
+      const cls = deviceClass(d.type);
+      card.className = "device-card " + cls;
+      card.dataset.type = cls;
+      card.dataset.ip = d.ip;
+      card.dataset.vendor = d.vendor;
+      card.dataset.iface = d.iface;
+      card.dataset.kind = d.source || "";
+
+      const randBadge = d.randomized ? `<span class="badge" title="Locally administered (likely randomized) MAC — often used by Wi‑Fi devices for privacy.">Randomized</span>` : "";
+      const vendorTip = `Vendor lookup: ${d.vendor === "Unknown" ? "No OUI match" : d.vendor}`;
+      const sourceTip = d.source ? `Source: ${d.source}` : "";
+      const hostnameTip = d.hostname ? `Hostname: ${d.hostname}` : "";
+      const hover = [
+        `IP: ${d.ip}`,
+        `MAC: ${d.mac}${d.randomized ? " (locally administered)" : ""}`,
+        vendorTip,
+        `Type: ${d.type}`,
+        hostnameTip,
+        `IFACE: ${d.iface}`,
+        sourceTip
+      ].filter(Boolean).join(" • ");
+
+      card.title = hover;
+
+      const hostDisplay = d.hostname ? ` <span class="badge" title="Hostname from discovery">${d.hostname}</span>` : "";
+
+      card.innerHTML = `
+        <span><strong>${d.ip}</strong>${hostDisplay}</span>
+        <span>${d.mac}${randBadge}</span>
+        <span>${d.vendor}</span>
+        <span>${d.type}</span>
+        <span>${d.iface}</span>
+        <span class="info-tooltip" aria-hidden="true">ℹ︎</span>
+      `;
+      tableDiv.appendChild(card);
+    });
+
+    section.appendChild(tableDiv);
+    resultsDiv.appendChild(section);
+
+    header.addEventListener("click", () => {
+      const isHidden = tableDiv.style.display === "none";
+      tableDiv.style.display = isHidden ? "block" : "none";
+      const arrow = header.querySelector(".toggle-arrow");
+      arrow.innerHTML = isHidden ? "▲" : "▼";
+    });
+
+    return;
+  }
+
+  // Grouped-by-subnet rendering (existing)
+  Object.keys(subnets).sort((a,b) => ipToNum(a + ".0") - ipToNum(b + ".0")).forEach(subnet => {
+    const devices = subnets[subnet];
+    const section = document.createElement("div");
+    section.className = "subnet-section";
+
+    const header = document.createElement("div");
+    header.className = "subnet-header";
+    header.innerHTML = `
+      <div>Subnet ${subnet}.x — <span class="device-count">${devices.length}</span> devices</div>
+      <div class="toggle-arrow">▲</div>
+    `;
+    section.appendChild(header);
+
+    const tableDiv = document.createElement("div");
+    tableDiv.style.display = "block";
+
+    devices.forEach(d => {
+      const card = document.createElement("div");
+      const cls = deviceClass(d.type);
+      card.className = "device-card " + cls;
+      card.dataset.type = cls;
+      card.dataset.ip = d.ip;
+      card.dataset.vendor = d.vendor;
+      card.dataset.iface = d.iface;
+      card.dataset.kind = d.source || "";
+
+      const randBadge = d.randomized ? `<span class="badge" title="Locally administered (likely randomized) MAC — often used by Wi‑Fi devices for privacy.">Randomized</span>` : "";
+      const vendorTip = `Vendor lookup: ${d.vendor === "Unknown" ? "No OUI match" : d.vendor}`;
+      const sourceTip = d.source ? `Source: ${d.source}` : "";
+      const hostnameTip = d.hostname ? `Hostname: ${d.hostname}` : "";
+      const hover = [
+        `IP: ${d.ip}`,
+        `MAC: ${d.mac}${d.randomized ? " (locally administered)" : ""}`,
+        vendorTip,
+        `Type: ${d.type}`,
+        hostnameTip,
+        `IFACE: ${d.iface}`,
+        sourceTip
+      ].filter(Boolean).join(" • ");
+
+      card.title = hover;
+
+      const hostDisplay = d.hostname ? ` <span class="badge" title="Hostname from discovery">${d.hostname}</span>` : "";
+
+      card.innerHTML = `
+        <span><strong>${d.ip}</strong>${hostDisplay}</span>
+        <span>${d.mac}${randBadge}</span>
+        <span>${d.vendor}</span>
+        <span>${d.type}</span>
+        <span>${d.iface}</span>
+        <span class="info-tooltip" aria-hidden="true">ℹ︎</span>
+      `;
+      tableDiv.appendChild(card);
+    });
+
+    section.appendChild(tableDiv);
+    resultsDiv.appendChild(section);
+
+    header.addEventListener("click", () => {
+      const isHidden = tableDiv.style.display === "none";
+      tableDiv.style.display = isHidden ? "block" : "none";
+      const arrow = header.querySelector(".toggle-arrow");
+      arrow.innerHTML = isHidden ? "▲" : "▼";
+    });
+  });
+}
+
+function applyFilterAndRender() {
+  const resultsDiv = document.getElementById("results");
+  // update groupBySubnet flag and persist
+  const toggleEl = document.getElementById("groupBySubnetToggle");
+  groupBySubnet = toggleEl ? !!toggleEl.checked : true;
+  saveState();
+
+  groupAndRender();
+
+  // Apply visual filtering to currently rendered cards
+  resultsDiv.querySelectorAll(".subnet-section").forEach(section => {
+    const typeFilter = document.getElementById("filterSelect").value;
+    const search = (document.getElementById("searchBox").value || "").toLowerCase();
+    const cards = section.querySelectorAll(".device-card");
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const matchesType = (typeFilter === "all") || (card.dataset.type === "device-type-" + typeFilter);
+      const text = card.textContent.toLowerCase();
+      const matchesSearch = search.length === 0 || text.includes(search);
+      if (matchesType && matchesSearch) {
+        card.style.display = "grid";
+        card.style.opacity = "1";
+        card.style.transform = "scale(1)";
+        visibleCount++;
+      } else {
+        card.style.display = "none";
+        card.style.opacity = "0";
+        card.style.transform = "scale(0.98)";
+      }
+    });
+    const countSpan = section.querySelector(".device-count");
+    if (countSpan) countSpan.textContent = visibleCount;
+  });
+
+  const filtered = getCurrentlyFilteredRows();
+  renderSummary(filtered);
+  renderChart(filtered);
+}
+
+function exportCSV() {
+  const filtered = getCurrentlyFilteredRows();
+  if (!filtered.length) return;
+  const header = ["ip","mac","vendor","type","iface","subnet","randomized","source","hostname"];
+  const lines = [header.join(",")];
+  for (const r of filtered) {
+    const row = [
+      r.ip,
+      r.mac,
+      csvEscape(r.vendor),
+      csvEscape(r.type),
+      r.iface,
+      r.subnet,
+      r.randomized ? "yes" : "no",
+      r.source || "",
+      csvEscape(r.hostname || "")
+    ];
+    lines.push(row.join(","));
+  }
+  const blob = new Blob([lines.join("\n")], {type: "text/csv;charset=utf-8"});
+  downloadBlob(blob, "network_devices.csv");
+}
+
+function exportJSON() {
+  const filtered = getCurrentlyFilteredRows();
+  if (!filtered.length) return;
+  const blob = new Blob([JSON.stringify(filtered, null, 2)], {type: "application/json;charset=utf-8"});
+  downloadBlob(blob, "network_devices.json");
+}
+
+function exportPerSubnet() {
+  const filtered = getCurrentlyFilteredRows();
+  if (!filtered.length) return;
+  const bySubnet = {};
+  for (const r of filtered) {
+    if (!bySubnet[r.subnet]) bySubnet[r.subnet] = [];
+    bySubnet[r.subnet].push(r);
+  }
+  const blob = new Blob([JSON.stringify(bySubnet, null, 2)], {type: "application/json;charset=utf-8"});
+  downloadBlob(blob, "network_devices_by_subnet.json");
+}
+
+async function copyResults() {
+  const filtered = getCurrentlyFilteredRows();
+  if (!filtered.length) {
+    alert("No results to copy.");
+    return;
+  }
+  const header = ["ip","mac","vendor","type","iface","subnet","randomized","source","hostname"];
+  const lines = [header.join("\t")];
+  for (const r of filtered) {
+    lines.push([
+      r.ip, r.mac, r.vendor, r.type, r.iface, r.subnet, r.randomized ? "yes" : "no", r.source || "", r.hostname || ""
+    ].join("\t"));
+  }
+  const text = lines.join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Filtered results copied to clipboard.");
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    alert("Filtered results copied to clipboard.");
+  }
+}
+
+function getCurrentlyFilteredRows() {
+  const typeFilter = document.getElementById("filterSelect").value;
+  const search = (document.getElementById("searchBox").value || "").toLowerCase();
+  const sortBy = document.getElementById("sortSelect").value || "ip";
+
+  const matchesType = (r) => (typeFilter === "all") || (deviceClass(r.type) === "device-type-" + typeFilter);
+  const matchesSearch = (r) => {
+    const hay = `${r.ip} ${r.mac} ${r.vendor} ${r.type} ${r.iface} ${r.hostname || ""}`.toLowerCase();
+    return search.length === 0 || hay.includes(search);
+  };
+
+  const filtered = globalRows.filter(r => matchesType(r) && matchesSearch(r));
+  return filtered.sort((a,b) => compareRows(a,b,sortBy));
+}
+
+function csvEscape(s) {
+  if (s == null) return "";
+  const str = String(s);
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }, 0);
+}
+
+function toggleTheme() {
+  const sel = document.getElementById("modeToggle").value;
+  applyTheme(sel);
+  try { localStorage.setItem("ns_theme", sel); } catch {}
+}
+function applyTheme(mode) {
+  document.body.classList.remove("light");
+  if (mode === "light") {
+    document.body.classList.add("light");
+  } else if (mode === "system") {
+    const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+    if (prefersLight) document.body.classList.add("light");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".collapsible").forEach(section => {
+    const header = section.querySelector(".collapsible-header");
+    const body = section.querySelector(".collapsible-body");
+    const arrow = header.querySelector(".toggle-arrow");
+    const isSummary = section.id === "summarySection";
+    body.style.display = isSummary ? "block" : "none";
+    arrow.textContent = isSummary ? "▲" : "▼";
+    section.setAttribute("aria-expanded", isSummary ? "true" : "false");
+
+    const toggle = () => {
+      const isHidden = body.style.display === "none";
+      body.style.display = isHidden ? "block" : "none";
+      arrow.textContent = isHidden ? "▲" : "▼";
+      section.setAttribute("aria-expanded", isHidden ? "true" : "false");
+    };
+
+    header.addEventListener("click", toggle);
+    header.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  });
+
+  restoreState();
+
+  const theme = (localStorage.getItem("ns_theme") || "dark");
+  const sel = document.getElementById("modeToggle");
+  sel.value = theme;
+  applyTheme(theme);
+
+  if ((document.getElementById("inputList").value || "").trim().length > 0) {
+    parseList();
+  } else {
+    // Ensure initial render respects toggle state
+    groupAndRender();
+    applyFilterAndRender();
+  }
+});
+
+function insertSample(kind) {
+  const textarea = document.getElementById("inputList");
+  if (kind === 'arp') {
+    textarea.value = document.getElementById("sampleArp").textContent.trim();
+  } else if (kind === 'nmap') {
+    textarea.value = document.getElementById("sampleNmap").textContent.trim();
+  }
+  textarea.focus();
+}
+
+function clearAll() {
+  document.getElementById("inputList").value = "";
+  document.getElementById("filterSelect").value = "all";
+  document.getElementById("sortSelect").value = "ip";
+  document.getElementById("searchBox").value = "";
+  saveState();
+  globalRows = [];
+  groupedBySubnet = {};
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("summary").innerHTML = "";
+  document.getElementById("chart").style.display = "none";
+  document.getElementById("summarySection").style.display = "none";
+}
+
+function saveState() {
+  try {
+    localStorage.setItem("ns_input", document.getElementById("inputList").value || "");
+    localStorage.setItem("ns_filter", document.getElementById("filterSelect").value || "all");
+    localStorage.setItem("ns_sort", document.getElementById("sortSelect").value || "ip");
+    localStorage.setItem("ns_search", document.getElementById("searchBox").value || "");
+    const g = document.getElementById("groupBySubnetToggle");
+    if (g) localStorage.setItem("ns_group", g.checked ? "1" : "0");
+  } catch {}
+}
+
+function restoreState() {
+  try {
+    const input = localStorage.getItem("ns_input");
+    const filter = localStorage.getItem("ns_filter");
+    const sort = localStorage.getItem("ns_sort");
+    const search = localStorage.getItem("ns_search");
+    const group = localStorage.getItem("ns_group");
+    if (input != null) document.getElementById("inputList").value = input;
+    if (filter) document.getElementById("filterSelect").value = filter;
+    if (sort) document.getElementById("sortSelect").value = sort;
+    if (search != null) document.getElementById("searchBox").value = search;
+    const g = document.getElementById("groupBySubnetToggle");
+    if (g) {
+      g.checked = group == null ? true : group === "1";
+      groupBySubnet = g.checked;
+    }
+  } catch {}
+}
+</script>
+</body>
+</html>
